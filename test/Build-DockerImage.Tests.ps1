@@ -1,6 +1,8 @@
-$ModulePath = Join-Path ($MyInvocation.MyCommand.Path | Split-Path -Parent | Split-Path -Parent) "src/DockerHelper"
+Import-Module (Join-Path (Get-Location) "test/Utils")
 
-Import-Module $ModulePath
+$DockerHelperPath = Join-Path ($MyInvocation.MyCommand.Path | Split-Path -Parent | Split-Path -Parent) "src/DockerHelper"
+Import-Module $DockerHelperPath
+
 
 InModuleScope DockerHelper {
 
@@ -10,38 +12,56 @@ InModuleScope DockerHelper {
 
       BeforeAll {
         $initialPath = Get-Location
-        Set-Location -Path (Join-Path -Path $initialPath -ChildPath "tests/resources/pwsh-alpine/")
-        New-Item -Path "./custom/context" -ItemType Directory
-
-        $pwshTar = "https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/powershell-7.4.1-linux-musl-x64.tar.gz"
-        Invoke-WebRequest $pwshTar -OutFile "./custom/context/powershell.tar.gz"
+        Set-Location -Path (Join-Path -Path $initialPath -ChildPath "test/resources/pwsh-alpine/")
+        SetupCustomBuildContext
       }
 
       It "builds image in localhost in the Dockerfile directory without context settings" {
-        $buildOutput = Build-DockerImage -Dockerfile "Dockerfile.no-context" `
+        $output = Build-DockerImage -Dockerfile "Dockerfile.no-context" `
           -Tag "pwsh-alpine:latest" `
           -Context . 2>&1
 
-        $LASTEXITCODE | Should -BeExactly 0
-        $buildOutput | Should -Not -Be $null
-        (docker images | Select-String "pwsh-alpine" -Quiet) | Should -BeTrue
+        AssertDockerBuildSuccess -Tag "pwsh-alpine" -BuildOutput $output
       }
 
       It "builds image in localhost in the Dockerfile directory with context directory" {
-
-        $buildOutput = Build-DockerImage -Dockerfile Dockerfile.context `
+        $output = Build-DockerImage -Dockerfile "Dockerfile.context" `
           -Tag "pwsh-alpine-context:latest" `
           -Context "./custom/context/" 2>&1
 
-        $LASTEXITCODE | Should -BeExactly 0
-        $buildOutput | Should -Not -Be $null
-        (docker images | Select-String "pwsh-alpine-context" -Quiet) | Should -BeTrue
+        AssertDockerBuildSuccess -Tag "pwsh-alpine-context" -BuildOutput $output
       }
 
       AfterAll {
+        TearDownBuildContextAndImages
         Set-Location -Path $initialPath
-        docker rmi pwsh-alpine:latest pwsh-alpine-context:latest
-        Remove-Item "tests/resources/pwsh-alpine/custom" -Recurse -Force
+      }
+    }
+
+    Context "[SUCCESS] Build image on localhost with custom Dockerfile directory." {
+
+      BeforeAll {
+        SetupCustomBuildContext
+      }
+
+      It "builds image in localhost without context settings" {
+        $output = Build-DockerImage -Dockerfile "./test/resources/pwsh-alpine/Dockerfile.no-context" `
+          -Tag "pwsh-alpine:latest" `
+          -Context . 2>&1
+
+        AssertDockerBuildSuccess -Tag "pwsh-alpine" -BuildOutput $output
+      }
+
+      It "builds image in localhost with context directory" {
+        $output = Build-DockerImage -Dockerfile "./test/resources/pwsh-alpine/Dockerfile.context" `
+          -Tag "pwsh-alpine-context:latest" `
+          -Context "./custom/context/" 2>&1
+
+        AssertDockerBuildSuccess -Tag "pwsh-alpine-context" -BuildOutput $output
+      }
+
+      AfterAll {
+        TearDownBuildContextAndImages
       }
     }
   }
