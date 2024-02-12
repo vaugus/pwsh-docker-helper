@@ -6,7 +6,7 @@ Import-Module $DockerHelperPath
 
 InModuleScope DockerHelper {
 
-  Describe "Build-DockerImage" {
+  Describe -Name "Build-DockerImage" -Tags @("local") {
 
     Context "[SUCCESS] Build image in the directory where Dockerfile resides." {
 

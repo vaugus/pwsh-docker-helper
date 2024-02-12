@@ -19,7 +19,7 @@ function Build-DockerImage {
 
   begin {
     if (![string]::IsNullOrWhitespace($ComputerName)) {
-      $env:DOCKER_HOST = "ssh://root@$ComputerName" + ":$Port"
+      $env:DOCKER_HOST = "ssh://root@$ComputerName" + ":" + $Port.ToString()
     }
   }
   
@@ -42,10 +42,27 @@ function Copy-Prerequisites {
       [string[]] $Path,
 
       [Parameter(Mandatory)]
-      [string] $Destination
+      [string] $Destination,
+      
+      [Parameter(Mandatory = $false)]
+      [System.Collections.Hashtable] $SessionProperties
     )
-  
+
+  begin {
+    $session = New-PSSession -Port ([int] $SessionProperties['Port']) `
+      -HostName "$ComputerName" `
+      -UserName $SessionProperties['UserName'] `
+      -KeyFilePath $SessionProperties['KeyFilePath']
+  }
+
+  process {
+    Copy-Item "$Path" -Destination "$Destination" -ToSession $session
+  }
+
+  end {
+    Remove-PSSession $session
+  }
 }
 
-
 Export-ModuleMember -Function Build-DockerImage
+Export-ModuleMember -Function Copy-Prerequisites

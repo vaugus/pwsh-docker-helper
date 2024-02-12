@@ -5,7 +5,7 @@ Import-Module $DockerHelperPath
 
 InModuleScope DockerHelper {
 
-  Describe "Build-DockerImage" {
+  Describe -Name "Build-DockerImage" -Tags @("remote") {
 
     Context "[SUCCESS] Build image on remote host." {
 

@@ -3,11 +3,13 @@
 set +x
 
 main() {
-  apk update && apk add openssh
+  apk update && apk add openssh powershell
 
   sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
   sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
   sed -i 's/#AddressFamily any/AddressFamily inet/' /etc/ssh/sshd_config
+  echo 'Subsystem powershell /usr/bin/pwsh -sshs -NoLogo -NoProfile' >> /etc/ssh/sshd_config
+
   mkdir -p ~/.ssh
   ssh-keygen -A 
 
