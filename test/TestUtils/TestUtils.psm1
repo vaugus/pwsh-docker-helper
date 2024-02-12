@@ -9,12 +9,28 @@ function AssertDockerBuildSuccess {
       [string] $Tag,
 
       [Parameter(Mandatory)]
-      [System.Object[]] $BuildOutput
-    )
+      [System.Object[]] $BuildOutput,
 
-  $LASTEXITCODE | Should -BeExactly 0
-  $BuildOutput | Should -Not -Be $null
-  (docker images | Select-String "$Tag" -Quiet) | Should -BeTrue
+      [Parameter(Mandatory = $false)]
+      [string] $ComputerName
+    )
+  
+  begin {
+    $LASTEXITCODE | Should -BeExactly 0
+    $BuildOutput | Should -Not -Be $null
+    if (![string]::IsNullOrWhitespace($ComputerName)) {
+      $env:DOCKER_HOST = "ssh://root@$ComputerName"
+    }
+  }
+    
+  process {
+    docker images
+    (docker images | Select-String "$Tag" -Quiet) | Should -BeTrue
+  }
+  
+  end {
+    $env:DOCKER_HOST = ''
+  }
 }
 
 function SetupCustomBuildContext {
@@ -24,8 +40,29 @@ function SetupCustomBuildContext {
 }
 
 function TearDownBuildContextAndImages {
-  docker rmi pwsh-alpine:latest pwsh-alpine-context:latest
-  Remove-Item "./custom" -Recurse -Force
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $false)]
+    [string[]] $ComputerName,
+
+    [Parameter(Mandatory)]
+    [string[]] $Tags
+  )
+
+  begin {
+    if (![string]::IsNullOrWhitespace($ComputerName)) {
+      $env:DOCKER_HOST = "ssh://root@$ComputerName"
+    }
+  }
+    
+  process {
+    foreach ($tag in $Tags) { docker rmi "$tag" }
+    Remove-Item "./custom" -Recurse -Force
+  }
+  
+  end {
+    $env:DOCKER_HOST = ''
+  }
 }
 
 function Get-ServerIP {

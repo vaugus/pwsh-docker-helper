@@ -8,10 +8,25 @@ function Build-DockerImage {
       [string] $Tag,
 
       [Parameter(Mandatory)]
-      [string] $Context
+      [string] $Context,
+
+      [Parameter(Mandatory=$false)]
+      [string] $ComputerName
     )
 
-  docker build -t "$Tag" -f "$Dockerfile" "$Context"
+  begin {
+    if (![string]::IsNullOrWhitespace($ComputerName)) {
+      $env:DOCKER_HOST = "ssh://root@$ComputerName"
+    }
+  }
+  
+  process {
+    docker build -t "$Tag" -f "$Dockerfile" "$Context"
+  }
+
+  end {
+    $env:DOCKER_HOST = ''
+  }
 }
 
 Export-ModuleMember -Function Build-DockerImage

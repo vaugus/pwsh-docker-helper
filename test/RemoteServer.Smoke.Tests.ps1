@@ -1,7 +1,6 @@
 Import-Module (Join-Path (Get-Location) "test/TestUtils")
 
-
-Describe "Remote Server Smoke Tests" {
+Describe -Name "Remote Server Smoke Tests" -Tags @("smoke") {
 
   Context "[SUCCESS] Remote Server starts, becomes accessible, and stops correctly." {
 
