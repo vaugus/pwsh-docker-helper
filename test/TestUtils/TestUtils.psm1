@@ -28,11 +28,15 @@ function TearDownBuildContextAndImages {
   Remove-Item "./custom" -Recurse -Force
 }
 
+function Get-ServerIP {
+  return (docker inspect --format=$SERVER_IP_JSONPATH server).ToString()
+}
+
 function SetupRemoteServer {
   ssh-keygen -b 2048 -t rsa -f test/resources/server/docker_helper -q -N ""
   docker run --privileged --name server -p 22:22 -d docker:dind
 
-  $serverIP = (docker inspect --format=$SERVER_IP_JSONPATH server).ToString()
+  $serverIP = Get-ServerIP
 
   ssh-keygen -f ~/.ssh/known_hosts -R "$serverIP"
   docker cp test/resources/server/docker_helper.pub server:/root/authorized_keys
@@ -50,6 +54,7 @@ function TearDownRemoteServer {
 }
 
 Export-ModuleMember -Function AssertDockerBuildSuccess
+Export-ModuleMember -Function Get-ServerIP
 Export-ModuleMember -Function SetupRemoteServer
 Export-ModuleMember -Function SetupCustomBuildContext
 Export-ModuleMember -Function TearDownBuildContextAndImages
