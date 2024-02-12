@@ -11,12 +11,15 @@ function Build-DockerImage {
       [string] $Context,
 
       [Parameter(Mandatory=$false)]
-      [string] $ComputerName
+      [string] $ComputerName,
+
+      [Parameter(Mandatory=$false)]
+      [int] $Port = 22
     )
 
   begin {
     if (![string]::IsNullOrWhitespace($ComputerName)) {
-      $env:DOCKER_HOST = "ssh://root@$ComputerName"
+      $env:DOCKER_HOST = "ssh://root@$ComputerName" + ":$Port"
     }
   }
   
@@ -28,5 +31,21 @@ function Build-DockerImage {
     $env:DOCKER_HOST = ''
   }
 }
+
+function Copy-Prerequisites {
+  [CmdletBinding()]
+    param(
+      [Parameter(Mandatory)]
+      [string] $ComputerName,
+
+      [Parameter(Mandatory)]
+      [string[]] $Path,
+
+      [Parameter(Mandatory)]
+      [string] $Destination
+    )
+  
+}
+
 
 Export-ModuleMember -Function Build-DockerImage

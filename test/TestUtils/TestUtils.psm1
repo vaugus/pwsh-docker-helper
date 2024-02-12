@@ -19,7 +19,7 @@ function AssertDockerBuildSuccess {
     $LASTEXITCODE | Should -BeExactly 0
     $BuildOutput | Should -Not -Be $null
     if (![string]::IsNullOrWhitespace($ComputerName)) {
-      $env:DOCKER_HOST = "ssh://root@$ComputerName"
+      $env:DOCKER_HOST = "ssh://root@$ComputerName" + ":2222"
     }
   }
     
@@ -51,7 +51,7 @@ function TearDownBuildContextAndImages {
 
   begin {
     if (![string]::IsNullOrWhitespace($ComputerName)) {
-      $env:DOCKER_HOST = "ssh://root@$ComputerName"
+      $env:DOCKER_HOST = "ssh://root@$ComputerName" + ":2222"
     }
   }
     
@@ -70,17 +70,26 @@ function Get-ServerIP {
 }
 
 function SetupRemoteServer {
+  $identityFilePath = (Get-Location).ToString() + "/test/resources/server/docker_helper"
   ssh-keygen -b 2048 -t rsa -f test/resources/server/docker_helper -q -N ""
-  docker run --privileged --name server -p 22:22 -d docker:dind
+  docker run --privileged --name server -p 2222:2222 -d docker:dind
 
   $serverIP = Get-ServerIP
 
-  ssh-keygen -f ~/.ssh/known_hosts -R "$serverIP"
+  ssh-keygen -f ~/.ssh/known_hosts -R "[$serverIP]:2222"
   docker cp test/resources/server/docker_helper.pub server:/root/authorized_keys
   docker cp test/resources/server/ssh_server.sh server:/root/
   docker exec -i server /root/ssh_server.sh
 
-  ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i test/resources/server/docker_helper root@"$serverIP" "docker ps"
+  # this is necessary for github workflow runner to connect to the server
+  New-Item ~/.ssh -ItemType Directory -ErrorAction SilentlyContinue
+	
+  Add-Content -Path ~/.ssh/config -Value "Host $serverIP" 
+  Add-Content -Path ~/.ssh/config -Value "    StrictHostKeyChecking no"
+  Add-Content -Path ~/.ssh/config -Value "    IdentitiesOnly yes"
+  Add-Content -Path ~/.ssh/config -Value "    IdentityFile $identityFilePath"
+
+  ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i test/resources/server/docker_helper -p 2222 root@"$serverIP" "docker ps"
 }
 
 function TearDownRemoteServer {

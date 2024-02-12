@@ -20,7 +20,8 @@ InModuleScope DockerHelper {
         $output = Build-DockerImage -Dockerfile "Dockerfile.no-context" `
           -Tag "pwsh-alpine-remote:latest" `
           -Context . `
-          -ComputerName "$computerName" 2>&1
+          -ComputerName "$computerName" `
+          -Port 2222 2>&1
 
         AssertDockerBuildSuccess -Tag "pwsh-alpine-remote" -BuildOutput $output -ComputerName "$computerName"
       }
@@ -30,7 +31,8 @@ InModuleScope DockerHelper {
         $output = Build-DockerImage -Dockerfile "Dockerfile.no-context" `
           -Tag "pwsh-alpine-context-remote:latest" `
           -Context "./custom/context/" `
-          -ComputerName "$computerName" 2>&1
+          -ComputerName "$computerName" `
+          -Port 2222 2>&1
 
         AssertDockerBuildSuccess -Tag "pwsh-alpine-context-remote" -BuildOutput $output -ComputerName "$computerName"
       }
@@ -55,7 +57,8 @@ InModuleScope DockerHelper {
         $output = Build-DockerImage -Dockerfile "./test/resources/pwsh-alpine/Dockerfile.no-context" `
           -Tag "pwsh-alpine-remote:latest" `
           -Context . `
-          -ComputerName "$computerName" 2>&1
+          -ComputerName "$computerName" `
+          -Port 2222 2>&1
 
         AssertDockerBuildSuccess -Tag "pwsh-alpine-remote" -BuildOutput $output -ComputerName "$computerName"
       }
@@ -65,7 +68,8 @@ InModuleScope DockerHelper {
         $output = Build-DockerImage -Dockerfile "./test/resources/pwsh-alpine/Dockerfile.context" `
           -Tag "pwsh-alpine-context-remote:latest" `
           -Context "./custom/context/" `
-          -ComputerName "$computerName" 2>&1
+          -ComputerName "$computerName" `
+          -Port 2222 2>&1
 
         AssertDockerBuildSuccess -Tag "pwsh-alpine-context-remote" -BuildOutput $output -ComputerName "$computerName"
       }
