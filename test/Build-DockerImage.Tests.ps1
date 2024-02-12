@@ -1,4 +1,4 @@
-Import-Module (Join-Path (Get-Location) "test/Utils")
+Import-Module (Join-Path (Get-Location) "test/TestUtils")
 
 $DockerHelperPath = Join-Path ($MyInvocation.MyCommand.Path | Split-Path -Parent | Split-Path -Parent) "src/DockerHelper"
 Import-Module $DockerHelperPath
