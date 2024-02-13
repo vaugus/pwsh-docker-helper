@@ -32,8 +32,8 @@ function Get-SequenceWithoutParameters {
   }
 }
 
-if (($args.Count -eq 0) -or ($args[0].ToString().Length -eq 0)) {
+if ([string]::isNullOrEmpty($env:NUMBER)) {
   Get-SequenceWithoutParameters
 } else {
-  Get-NumberInSequence $args[0]
+  Get-NumberInSequence ([int] $env:NUMBER)
 }

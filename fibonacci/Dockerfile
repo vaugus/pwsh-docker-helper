@@ -11,4 +11,4 @@ WORKDIR /home/fibonacci
 
 USER fibonacci:fibonacci
 
-CMD pwsh fibonacci.ps1 "${NUMBER}"
+CMD pwsh fibonacci.ps1
