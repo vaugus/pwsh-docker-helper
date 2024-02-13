@@ -7,7 +7,7 @@ InModuleScope DockerHelper {
 
   Describe -Name "Copy-Prerequisites" -Tags @("remote") {
 
-    Context "[SUCCESS] Copy file to remote host." {
+    Context "Copy file to remote host." {
 
       It "copies a file to a remote server" {
         $computerName = Get-ServerIP

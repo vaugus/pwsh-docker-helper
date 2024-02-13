@@ -64,5 +64,47 @@ function Copy-Prerequisites {
   }
 }
 
+function Run-DockerContainer {
+  [CmdletBinding()]
+    param(
+      [Parameter(Mandatory)]
+      [string] $ImageName,
+
+      [Parameter(Mandatory = $false)]
+      [string] $ComputerName = "localhost",
+
+      [Parameter(Mandatory = $false)]
+      [string[]] $DockerParams,
+
+      [Parameter(Mandatory = $false)]
+      [int] $Port = 22,
+
+      [Parameter(Mandatory = $false)]
+      [string] $Command = 'standard command'
+    )
+
+  begin {
+    if (![string]::IsNullOrWhitespace($ComputerName) -and !$ComputerName.Equals("localhost")) {
+      $env:DOCKER_HOST = "ssh://root@$ComputerName" + ":" + $Port.ToString()
+    }
+  }
+  
+  process {
+    Write-Host "Will run $Command in a container with $ImageName image."
+    if (!$Command.Equals('standard command')) {
+      $containerId = (docker run -d $DockerParams $ImageName $Command).ToString()
+    } else {
+      $containerId = (docker run -d $DockerParams $ImageName).ToString()
+    }
+
+    return (docker inspect --format='{{.Name}}' "$containerId").ToString()
+  }
+
+  end {
+    $env:DOCKER_HOST = ''
+  }
+}
+
 Export-ModuleMember -Function Build-DockerImage
 Export-ModuleMember -Function Copy-Prerequisites
+Export-ModuleMember -Function Run-DockerContainer

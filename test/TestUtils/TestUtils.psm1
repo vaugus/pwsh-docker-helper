@@ -83,6 +83,10 @@ function SetupRemoteServer {
 
   # this is necessary for github workflow runner to connect to the server
   New-Item ~/.ssh -ItemType Directory -ErrorAction SilentlyContinue
+
+  if (Test-Path ~/.ssh/config -PathType Leaf) {
+    Copy-Item ~/.ssh/config -Destination ~/.ssh/config-bkp
+  }
 	
   Add-Content -Path ~/.ssh/config -Value "Host $serverIP" 
   Add-Content -Path ~/.ssh/config -Value "    StrictHostKeyChecking no"
@@ -97,6 +101,10 @@ function TearDownRemoteServer {
   docker container rm server 2>&1 > /dev/null
   docker rmi server:latest 2>&1 > /dev/null
   Remove-Item test/resources/server/docker_helper*
+  if (Test-Path ~/.ssh/config-bkp -PathType Leaf) {
+    Copy-Item ~/.ssh/config-bkp -Destination ~/.ssh/config
+    Remove-Item ~/.ssh/config-bkp
+  }
 }
 
 Export-ModuleMember -Function AssertDockerBuildSuccess

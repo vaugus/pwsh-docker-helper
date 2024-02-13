@@ -2,7 +2,7 @@ Import-Module (Join-Path (Get-Location) "test/TestUtils")
 
 Describe -Name "Remote Server Smoke Tests" -Tags @("smoke") {
 
-  Context "[SUCCESS] Remote Server starts, becomes accessible, and stops correctly." {
+  Context "Remote Server starts, becomes accessible, and stops correctly." {
 
     BeforeAll {
       $remoteServerStartupLogs = (SetupRemoteServer 2>&1) -join "`n"

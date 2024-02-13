@@ -7,7 +7,7 @@ InModuleScope DockerHelper {
 
   Describe -Name "Build-DockerImage" -Tags @("remote") {
 
-    Context "[SUCCESS] Build image on remote host." {
+    Context "Build image on remote host." {
 
       BeforeAll {
         $initialPath = Get-Location
@@ -46,7 +46,7 @@ InModuleScope DockerHelper {
       }
     }
 
-    Context "[SUCCESS] Build image on remote host with custom Dockerfile directory." {
+    Context "Build image on remote host with custom Dockerfile directory." {
 
       BeforeAll {
         SetupCustomBuildContext

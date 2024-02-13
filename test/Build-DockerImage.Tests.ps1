@@ -8,7 +8,7 @@ InModuleScope DockerHelper {
 
   Describe -Name "Build-DockerImage" -Tags @("local") {
 
-    Context "[SUCCESS] Build image in the directory where Dockerfile resides." {
+    Context "Build image in the directory where Dockerfile resides." {
 
       BeforeAll {
         $initialPath = Get-Location
@@ -38,7 +38,7 @@ InModuleScope DockerHelper {
       }
     }
 
-    Context "[SUCCESS] Build image with custom Dockerfile directory." {
+    Context "Build image with custom Dockerfile directory." {
 
       BeforeAll {
         SetupCustomBuildContext
